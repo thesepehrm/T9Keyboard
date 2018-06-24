@@ -1,0 +1,152 @@
+<!doctype html>
+<html class="uk-height-1-1">
+
+<head>
+    <title>T9 Emulator</title>
+
+    <meta charset="UTF-8">
+    <meta name="author" content="Sepehr Mohammadi">
+    <meta name="description" content="A T9 Predictive Text Emulator">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="css/uikit.min.css" rel="stylesheet">
+    <link href="css/site.css" rel="stylesheet">
+    <script type="text/javascript" src="js/predict.js"></script>
+</head>
+
+<body class="uk-height-1-1 uk-width-1-1 uk-background-muted">
+    <div class="uk-position-center" uk-grid>
+        <div class="uk-card uk-card-primary uk-card-body">
+            <h3 class="uk-card-title">T9 Predictive Text</h3>
+        </div>
+        <div class="uk-card uk-card-default uk-card-body">
+            <div class="uk-grid-small" uk-grid>
+                <div class="uk-width-1-1 uk-margin-small">
+                    <input id="txtoutput" class="uk-input" type="text" readonly placeholder="">
+                </div>
+
+                <div class="uk-width-1-1 uk-margin-small">
+                    <div>
+                        <div class="uk-button-group uk-width-1-1">
+                            <button id="btn1" class="uk-button uk-button-default uk-width-1-3">1<br>.</button>
+                            <button id="btn2" class="uk-button uk-button-default uk-width-1-3">2<br>ABC</button>
+                            <button id="btn3" class="uk-button uk-button-default uk-width-1-3">3<br>DEF</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="uk-button-group uk-width-1-1">
+                            <button id="btn4" class="uk-button uk-button-default uk-width-1-3">4<br>GHI</button>
+                            <button id="btn5" class="uk-button uk-button-default uk-width-1-3">5<br>JKL</button>
+                            <button id="btn6" class="uk-button uk-button-default uk-width-1-3 ">6<br>MNO</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="uk-button-group uk-width-1-1">
+                            <button id="btn7" class="uk-button uk-button-default uk-width-1-3">7<br>PQRST</button>
+                            <button id="btn8" class="uk-button uk-button-default uk-width-1-3">8<br>UVW</button>
+                            <button id="btn9" class="uk-button uk-button-default uk-width-1-3">9<br>XYZ</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="uk-button-group uk-width-1-1">
+                            <button id="btn*" class="uk-button uk-button-default uk-width-1-3">*<br>Cycle</button>
+                            <button id="btn0" class="uk-button uk-button-default uk-width-1-3">0<br>_</button>
+                            <button id="btn#" class="uk-button uk-button-default uk-width-1-3">#<br>DEL</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="uk-card uk-card-primary uk-card-body">
+            <p>Made by Sepehr Mohammadi</p>
+            <p><a href="https://thesepehrm.com/">Website</a></p>
+        </div>
+    </div>
+    <script type="text/javascript" src="js/uikit-icons.min.js"></script>
+    <script>
+    </script>
+</body>
+<script type="text/javascript">
+    let delta = 0;
+    let createdstring = "";
+    let matchedstring = "";
+    let conststring = "";
+    let match = [];
+    let index = 0;
+    window.ontouchstart = window.onmousedown;
+    window.onmousedown = function(e) {
+        if (e.target.localName == 'button') {
+            delta = (new Date()).getTime() / 1000;
+        }
+
+    };
+    window.onclick = function(e) {
+        if (e.target.localName == 'button') {
+            delta = (new Date()).getTime() / 1000 - delta;
+            if (delta >= 1.5) {
+                document.getElementById('txtoutput').value += e.target.id.replace('btn', '');
+                createdstring = ""
+                return;
+            }
+            delta = 0;
+            let number = e.target.id.replace('btn', '');
+            let numchars = {
+                '1': function doDot() {
+                    document.getElementById('txtoutput').value += ".";
+                    conststring += matchedstring + ".";
+                    createdstring = "";
+                    matchedsting = "";
+                },
+                '2': '[abc]',
+                '3': '[def]',
+                '4': '[ghi]',
+                '5': '[jkl]',
+                '6': '[mno]',
+                '7': '[pqrst]',
+                '8': '[uvw]',
+                '9': '[xyz]',
+                '*': function cycle() {
+                    if (match !== null) {
+                        index++;
+                        matchedstring = match[index % match.length];
+                        document.getElementById('txtoutput').value = conststring + matchedstring;
+                    }
+                },
+
+                '0': function nextWord() {
+                    conststring += matchedstring + " ";
+                    createdstring = "";
+                    matchedsting = "";
+                    document.getElementById('txtoutput').value += " ";
+                },
+                '#': function del() {
+                    if (createdstring == "") {
+                        conststring = conststring.substr(0, conststring.length - 1);
+                        document.getElementById('txtoutput').value = conststring;
+                    }
+                    document.getElementById('txtoutput').value = conststring;
+                    createdstring = ""
+                    matchedstring = ""
+                }
+            };
+            if (typeof(numchars[number]) == 'string') {
+                createdstring += numchars[number]
+                match = predict(createdstring);
+                if (match == null) {
+                    document.getElementById('txtoutput').value += numchars[number][1];
+                } else {
+                    matchedstring = match[0];
+                    index = 0;
+                    document.getElementById('txtoutput').value = conststring + matchedstring;
+                }
+
+            } else {
+                numchars[number]();
+            }
+
+        }
+
+    };
+</script>
+
+</html>
